@@ -1,47 +1,31 @@
 <?php
 
-class Task {
-
-   private $db;
-
-   public function __construct($db)
+class Task extends Database
+{
+    public function all($limit=null)
     {
-        $this->db = $db;
+        $sql = "SELECT tasks.subject as task_subject , notes.*
+         FROM tasks JOIN notes ON tasks.task_id = notes.task_id 
+         ORDER BY CASE priority
+           WHEN 'High' THEN 1
+           WHEN 'Medium' THEN 2
+           WHEN 'Low' THEN 3
+           ELSE 5
+         END";
+        return $this->fetchAll($sql);
     }
- 
-  public function getAll () {
-    return $this->db->all(
-      "SELECT * FROM `tasks`",
-      null, "id"
-    );
-  }
+    
+    public function getById($param)
+    {
 
-  public function get ($id) {
-    return $this->db->findById(
-      "SELECT * FROM `tasks` WHERE `user_". (is_numeric($id)?"id":"email") ."`=?",
-      [$id]
-    );
-  }
-
-  public function add ($subject) {
-    return $this->db->runQuery(
-      "INSERT INTO `tasks` (`subject`) VALUES (?)",
-      [$subject]
-    );
-  }
-
-  public function edit ($name, $email, $id) {
-    return $this->db->runQuery(
-      "UPDATE `tasks` SET `user_name`=?, `user_email`=? WHERE `user_id`=?",
-      [$name, $email, $id]
-    );
-  }
-
-
-  public function del ($id) {
-    return $this->db->runQuery(
-      "DELETE FROM `tasks` WHERE `id`=?",
-      [$id]
-    );
-  }
+      return  $this->fetch( "SELECT * FROM `tasks` WHERE `task_id`=?",
+      [$param]);
+    }   
+    public function add ($data) {
+       $this->runQuery(
+        "INSERT INTO `tasks` (`subject`, `description`,`status`,`priority`,`start_date`,`due_date`) VALUES (?, ?, ?, ?, ?, ?)",
+        [$data['subject'], $data['description'], $data['status'], $data['priority'], $data['start_date'], $data['due_date']]
+      );
+       return $this->lastInsertedId();
+    }
 }

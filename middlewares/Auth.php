@@ -1,5 +1,4 @@
 <?php
-require __DIR__ . '/config/JwtHandler.php';
 
 class Auth extends JwtHandler
 {
@@ -16,11 +15,9 @@ class Auth extends JwtHandler
 
     public function isValid()
     {
-
+        
         if (array_key_exists('Authorization', $this->headers) && preg_match('/Bearer\s(\S+)/', $this->headers['Authorization'], $matches)) {
-
             $data = $this->jwtDecodeData($matches[1]);
-
             if (
                 isset($data['data']->user_id) &&
                 $user = $this->fetchUser($data['data']->user_id)
@@ -46,13 +43,9 @@ class Auth extends JwtHandler
     protected function fetchUser($user_id)
     {
         try {
-            $fetch_user_by_id = "SELECT `name`,`email` FROM `users` WHERE `id`=:id";
-            $query_stmt = $this->db->prepare($fetch_user_by_id);
-            $query_stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
-            $query_stmt->execute();
-
-            if ($query_stmt->rowCount()) :
-                return $query_stmt->fetch(PDO::FETCH_ASSOC);
+            $userObj = new User();
+            if ($row = $userObj->getById($user_id)) :
+                return $row;
             else :
                 return false;
             endif;

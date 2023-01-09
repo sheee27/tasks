@@ -1,47 +1,38 @@
 <?php
 
-class Note {
-
-   private $db;
-
-   public function __construct($db)
+class Note extends Database
+{
+    public function all($limit=null)
     {
-        $this->db = $db;
+        return $this->fetchAll("SELECT * FROM notes ORDER BY note_id ASC");
     }
- 
-  public function getAll () {
-    return $this->db->all(
-      "SELECT * FROM `tasks`",
-      null, "id"
-    );
-  }
+    
+    public function getById($param)
+    {
 
-  public function get ($id) {
-    return $this->db->findById(
-      "SELECT * FROM `tasks` WHERE `user_". (is_numeric($id)?"id":"email") ."`=?",
-      [$id]
-    );
-  }
+      return  $this->fetch( "SELECT * FROM `notes` WHERE `note_id`=?",
+      [$param]);
+    }   
+    public function add ($data) {
+      $insertvalues = array();
+      foreach ($data as $d) {
+        $questionmarks[] = '(' . $this->placeholder( '?', count($d)) . ')';
+        $insertvalues = array_merge( $insertvalues, array_values($d));
+      }
+      $sql = "INSERT INTO `notes` (`subject`, `task_id`,`attachment`,`note`)  VALUES " . implode( ',', $questionmarks);
+       $this->runQuery($sql,$insertvalues);
+       return $this->lastInsertedId();
+    }
 
-  public function add ($subject) {
-    return $this->db->runQuery(
-      "INSERT INTO `tasks` (`subject`) VALUES (?)",
-      [$subject]
-    );
-  }
+    function placeholder( $text, $count = 0, $separator = ',' ) {
+        $result = array();
 
-  public function edit ($name, $email, $id) {
-    return $this->db->runQuery(
-      "UPDATE `tasks` SET `user_name`=?, `user_email`=? WHERE `user_id`=?",
-      [$name, $email, $id]
-    );
-  }
+        if ($count > 0) {
+          for ($x = 0; $x < $count; $x++) {
+            $result[] = $text;
+          }
+        }
 
-
-  public function del ($id) {
-    return $this->db->runQuery(
-      "DELETE FROM `tasks` WHERE `id`=?",
-      [$id]
-    );
-  }
+        return implode( $separator, $result );
+      }
 }
