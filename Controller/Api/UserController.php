@@ -41,7 +41,7 @@ class UserController extends BaseController
         $requestMethod = $_SERVER["REQUEST_METHOD"];
         $arrQueryStringParams = $this->getQueryStringParams();
         $data = json_decode(file_get_contents("php://input"));
-        $returnData = [];
+
         if (strtoupper($requestMethod) == 'POST') {
                 
                   if(!isset($data->email) 
@@ -124,7 +124,6 @@ class UserController extends BaseController
         $requestMethod = $_SERVER["REQUEST_METHOD"];
         $arrQueryStringParams = $this->getQueryStringParams();
         $data = json_decode(file_get_contents("php://input"));
-        $returnData = [];
         if (strtoupper($requestMethod) == 'POST') {
                 
                         if ( !isset($data->name)
@@ -199,7 +198,6 @@ class UserController extends BaseController
         $requestMethod = $_SERVER["REQUEST_METHOD"];
         $arrQueryStringParams = $this->getQueryStringParams();
         $data = json_decode(file_get_contents("php://input"));
-        $returnData = [];
         $allHeaders = getallheaders();
         $auth = new Auth(new User(), $allHeaders);
         $isValid = $auth->isValid();
@@ -281,7 +279,10 @@ class UserController extends BaseController
         $strErrorDesc = '';
         $requestMethod = $_SERVER["REQUEST_METHOD"];
         $arrQueryStringParams = $this->getQueryStringParams();
-        if (strtoupper($requestMethod) == 'GET') {
+        $allHeaders = getallheaders();
+        $auth = new Auth(new User(), $allHeaders);
+        $isValid = $auth->isValid();
+        if (strtoupper($requestMethod) == 'GET' && $isValid['success']) {
             try {
                 $taskObj = new Task();
                 $arrTasks = $taskObj->all();
